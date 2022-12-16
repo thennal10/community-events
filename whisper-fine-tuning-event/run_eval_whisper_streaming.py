@@ -32,9 +32,10 @@ def get_text(sample):
             ".join{sample.keys()}. Ensure a text column name is present in the dataset."
         )
 
+whisper_norm = lambda x: x.strip(' .,;:!?-')
 
 def normalise(batch):
-    batch["norm_text"] = get_text(batch).strip(' .,;:!?-')
+    batch["norm_text"] = whisper_norm(get_text(batch))
     return batch
 
 
