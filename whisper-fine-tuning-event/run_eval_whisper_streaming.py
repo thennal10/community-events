@@ -1,11 +1,11 @@
 import argparse
 
 from transformers import pipeline
-from transformers.models.whisper.english_normalizer import BasicTextNormalizer
 from datasets import load_dataset, Audio
 import evaluate
 
 wer_metric = evaluate.load("wer")
+cer_metric = evaluate.load("cer")
 
 
 def is_target_text_in_range(ref):
@@ -33,11 +33,8 @@ def get_text(sample):
         )
 
 
-whisper_norm = BasicTextNormalizer()
-
-
 def normalise(batch):
-    batch["norm_text"] = whisper_norm(get_text(batch))
+    batch["norm_text"] = get_text(batch).strip(' .,;:!?-')
     return batch
 
 
@@ -84,7 +81,11 @@ def main(args):
     wer = wer_metric.compute(references=references, predictions=predictions)
     wer = round(100 * wer, 2)
 
+    cer = cer_metric.compute(references=references, predictions=predictions)
+    cer = round(100 * cer, 2)
+
     print("WER:", wer)
+    print("CER:", cer)
 
 
 if __name__ == "__main__":
