@@ -90,13 +90,10 @@ def main(args):
         references.append(out["reference"][0])
 
     wer = wer_metric.compute(references=references, predictions=predictions)
-    wer = round(100 * wer, 2)
-
     cer = cer_metric.compute(references=references, predictions=predictions)
-    cer = round(100 * cer, 2)
 
-    print("WER:", wer)
-    print("CER:", cer)
+    print("WER:", wer*100)
+    print("CER:", cer*100)
 
 
 if __name__ == "__main__":
