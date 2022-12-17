@@ -4,6 +4,7 @@ from transformers import pipeline
 from transformers.models.whisper.english_normalizer import BasicTextNormalizer
 from datasets import load_dataset, Audio
 import evaluate
+import unicodedata
 
 wer_metric = evaluate.load("wer")
 cer_metric = evaluate.load("cer")
