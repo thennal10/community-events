@@ -1,6 +1,7 @@
 import argparse
 
 from transformers import pipeline
+from transformers.models.whisper.english_normalizer import BasicTextNormalizer
 from datasets import load_dataset, Audio
 import evaluate
 
@@ -32,7 +33,15 @@ def get_text(sample):
             ".join{sample.keys()}. Ensure a text column name is present in the dataset."
         )
 
-whisper_norm = lambda x: x.strip(' .,;:!?-')
+def remove_symbols(s):
+    return "".join(" " if unicodedata.category(c)[0] in "SP" else c for c in unicodedata.normalize("NFKC", s)).strip()
+
+class Normalizer(BasicTextNormalizer):
+    def __init__(self):
+        super().__init__()
+        self.clean = remove_symbols
+
+whisper_norm = Normalizer()
 
 def normalise(batch):
     batch["norm_text"] = whisper_norm(get_text(batch))
@@ -47,7 +56,7 @@ def data(dataset):
 def main(args):
     batch_size = args.batch_size
     whisper_asr = pipeline(
-        "automatic-speech-recognition", model=args.model_id, device=args.device
+        "automatic-speech-recognition", model=args.model_id, device=args.device, revision=args.revision
     )
 
     whisper_asr.model.config.forced_decoder_ids = (
@@ -146,6 +155,12 @@ if __name__ == "__main__":
         type=str,
         required=True,
         help="Two letter language code for the transcription language, e.g. use 'en' for English.",
+    )
+    parser.add_argument(
+        "--revision",
+        type=str,
+        default="main",
+        help="Which revision of the model you want to evaluate.",
     )
     args = parser.parse_args()
 
