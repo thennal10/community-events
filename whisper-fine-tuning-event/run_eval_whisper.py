@@ -74,9 +74,10 @@ def main(args):
         dataset = load_dataset(
             args.dataset,
             config,
-            streaming=False
+            split="train",
+            streaming=True
         )
-        dataset = concatenate_datasets(list(dataset.values()))
+        dataset = dataset.take(args.max_eval_samples)
         dataset = dataset.cast_column("audio", Audio(sampling_rate=16000))
         dataset = dataset.map(normalise)
         dataset = dataset.filter(is_target_text_in_range, input_columns=["norm_text"])
