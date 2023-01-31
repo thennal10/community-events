@@ -1,5 +1,5 @@
 import argparse
-
+import unicodedata
 from transformers import pipeline
 from transformers.models.whisper.english_normalizer import BasicTextNormalizer
 from datasets import load_dataset, concatenate_datasets, Audio
@@ -33,7 +33,20 @@ def get_text(sample):
         )
 
 
-whisper_norm = BasicTextNormalizer()
+def remove_symbols(s: str):
+    """
+    Replace any other markers, symbols, punctuations with a space, keeping diacritics
+    """
+    return "".join(" " if unicodedata.category(c)[0] in "SP" else c for c in unicodedata.normalize("NFKC", s))
+
+
+class ModifiedTextNormalizer(BasicTextNormalizer):
+    def __init__(self, remove_diacritics: bool = False, split_letters: bool = False):
+        self.clean = remove_symbols
+        self.split_letters = split_letters
+
+
+whisper_norm = ModifiedTextNormalizer()
 
 
 def normalise(batch):
