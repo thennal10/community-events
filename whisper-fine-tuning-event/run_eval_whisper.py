@@ -6,7 +6,7 @@ from datasets import load_dataset, concatenate_datasets, Audio
 import evaluate
 
 wer_metric = evaluate.load("wer")
-
+cer_metric = evaluate.load("cer")
 
 def is_target_text_in_range(ref):
     if ref.strip() == "ignore time segment in scoring":
@@ -91,8 +91,9 @@ def main(args):
             references.append(out["reference"][0])
 
         wer = wer_metric.compute(references=references, predictions=predictions)
+        cer = cer_metric.compute(references=references, predictions=predictions)
 
-        print(f"{lang} WER: {wer*100}")
+        print(f"{lang} WER: {wer*100} CER {cer*100}") 
 
 
 if __name__ == "__main__":
